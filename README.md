@@ -1,20 +1,24 @@
 # Duu Jato
 
-Sistema de agendamento para lava-jato. Clientes escolhem serviço, veículo, data e horário; a equipe acompanha os pedidos, confirma, conclui ou cancela pelo painel `/admin`.
+Sistema de agendamento para lava-jato, com página para clientes e painel protegido para o proprietário.
 
-## Executar localmente
+## O que o proprietário pode fazer
 
-Requer Node.js 22.13+ e pnpm. Instale com `pnpm install` e execute `pnpm dev`. Para produção, use `pnpm build` e um ambiente Cloudflare Workers com D1. A tabela é criada pelas migrações em `drizzle/`; configure o binding `DB` e a variável de ambiente `ADMIN_EMAIL` com o e-mail da conta autorizada. O login administrativo usa a identidade encaminhada pela plataforma Sites, validada no servidor. Consulte a documentação do ambiente para autenticação ao hospedar fora do Sites.
+- Acompanhar pedidos, confirmar, concluir ou cancelar (cancelar libera o horário).
+- Criar, editar, ocultar ou reativar serviços; definir nome, descrição, duração e preço opcional.
+- Definir expediente de cada dia da semana, pausas e datas fechadas.
+- Alterar nome do lava-jato, telefone, endereço e aviso exibido para clientes.
+- Copiar o link da página de agendamento na aba **Link de agendamento**.
+- Na conta principal, autorizar outro e-mail para administrar o painel na aba **Acessos**. A pessoa entra com uma conta ChatGPT no e-mail autorizado; não há envio automático de convite.
 
-## Operação
+Acesse `/admin` para entrar. O acesso inicial usa a conta autorizada em `ADMIN_EMAIL`. Os clientes acessam `/`, sem login. A página precisa estar publicada com acesso público para o link funcionar para clientes externos.
 
-1. Entre em `/admin` com a conta autorizada.
-2. Cadastre serviços, duração e preço opcional. Serviços desativados deixam de aparecer no agendamento.
-3. Compartilhe a página principal com clientes após liberar o acesso público na hospedagem.
-4. Agendamentos novos ficam como **Aguardando** até a confirmação. O cancelamento libera o horário.
+## Regras de agenda
 
-Expediente inicial: 08:00–18:00, horários a cada 30 minutos, uma vaga simultânea. Datas podem ser agendadas com até 90 dias de antecedência. O sistema não cobra pagamentos; valores em branco aparecem como “Valor a confirmar”. Ajuste expediente e capacidade em `lib/booking.ts` e rotas de disponibilidade/reserva antes de operar com várias baias.
+Fuso `America/Sao_Paulo`, uma vaga simultânea, intervalos de 30 minutos e reservas com até 90 dias de antecedência. O expediente inicial é 08:00–18:00 todos os dias até o proprietário alterá-lo. Mudanças de horário ou fechamento de datas impedem novas reservas, mas não cancelam reservas existentes; cancele-as na agenda quando necessário. Preço vazio aparece como “Valor a confirmar”. O sistema recebe solicitações, não cobra pagamentos automaticamente.
 
-## Segurança e dados
+## Desenvolvimento
 
-O painel exige autenticação e confere o e-mail `ADMIN_EMAIL` no servidor. Nunca inclua essa variável, credenciais ou dados de clientes no GitHub. O banco D1 guarda nome, telefone, veículo, placa e horário para a operação do agendamento.
+Node.js 22.13+ e pnpm. Execute `pnpm install`, `pnpm dev` e `pnpm build`. A aplicação usa Cloudflare Workers com binding D1 `DB`. Migrações estão em `drizzle/`. Configure `ADMIN_EMAIL` como variável de ambiente na hospedagem, nunca no código; a identidade do usuário é validada por cabeçalhos autenticados do Sites. Para hospedar fora do Sites, substitua a integração de autenticação do servidor por um provedor seguro e configure o banco.
+
+O banco guarda nome, telefone, veículo, placa, agendamento e configurações. O painel e as APIs administrativas verificam a autorização no servidor. Não inclua credenciais nem dados de clientes no GitHub.

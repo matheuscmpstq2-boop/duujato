@@ -8,6 +8,20 @@
       "when": 1790129216565,
       "tag": "0000_dark_obadiah_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1790130217014,
+      "tag": "0001_abnormal_captain_universe",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1790130436766,
+      "tag": "0002_nappy_captain_flint",
+      "breakpoints": true
     }
   ]
 }
