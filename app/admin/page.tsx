@@ -1,4 +1,6 @@
-import { admin } from '@/lib/booking';
+import {admin,owner} from '@/lib/booking';
+import {getAccountUser} from '@/lib/auth';
+import Login from './login';
 import AdminPanel from './panel';
 export const dynamic='force-dynamic';
-export default async function Admin(){const allowed=await admin();return <><header className="top shell"><a className="brand" href="/">DUU<span>JATO</span></a><a href="/">Agendamento</a></header><main className="shell admin">{allowed?<AdminPanel/>:<div className="card"><h1>Área restrita</h1><p className="muted">Entre com a conta autorizada para acompanhar os agendamentos.</p><a className="cta" style={{display:'inline-flex',alignItems:'center',justifyContent:'center',padding:'0 20px',width:'auto'}} href="/signin-with-chatgpt?return_to=%2Fadmin">Entrar com ChatGPT</a></div>}</main></>}
+export default async function Admin(){const [allowed,user,canManageAccess]=await Promise.all([admin(),getAccountUser(),owner()]);return <><header className="top shell"><a className="brand brand-with-logo" href="/"><img src="/duujato-logo.webp" alt="" width="56" height="38"/>DUU<span>JATO</span></a><a href="/">Página de agendamento</a></header><main className="shell admin">{allowed?<AdminPanel email={user?.email||''} canManageAccess={canManageAccess}/>:<Login/>}</main></>}
