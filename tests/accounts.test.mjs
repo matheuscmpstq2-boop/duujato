@@ -1,0 +1,20 @@
+import {test} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import vm from 'node:vm';
+import ts from 'typescript';
+const require=createRequire(import.meta.url);
+function load(path,mocks={}){const source=readFileSync(new URL('../'+path,import.meta.url),'utf8');const code=ts.transpileModule(source,{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;const module={exports:{}};vm.runInNewContext(code,{module,exports:module.exports,require:name=>mocks[name]??require(name),Response,URL,console,process,crypto:globalThis.crypto});return module.exports}
+const access=load('lib/access.ts');
+function fixture({owner=true,ready=true,exists=false,mailFails=false,dbFails=false}={}){const calls=[];const db=()=>({prepare:sql=>({bind:()=>({first:async()=>exists?{email:'worker@example.com'}:null,run:async()=>{calls.push('grant');if(dbFails)throw Error('db')}})})});const auth={auth:{admin:{createUser:async()=>{calls.push('create');return {data:{user:{id:'employee-id'}},error:null}},deleteUser:async()=>{calls.push('rollback');return {error:null}}}}};const route=load('app/api/admin/accounts/route.ts',{'@/lib/booking':{owner:async()=>owner,db,fail:(error,status=400)=>Response.json({error},{status})},'@/lib/access':access,'@/lib/employee-provisioning':{employeeAuth:()=>auth,invitationsConfigured:()=>ready,temporaryPassword:()=> 'TEST-SECRET-NEVER-RETURN',sendEmployeeAccess:async()=>{calls.push('send');if(mailFails)throw Error('mail')}}});return {route,calls}}
+const request=email=>({json:async()=>({email})});
+test('employee cannot provision another employee',async()=>{const {route,calls}=fixture({owner:false});assert.equal((await route.POST(request('worker@example.com'))).status,403);assert.deepEqual(calls,[])});
+test('owner cannot be added as employee',async()=>{const {route,calls}=fixture();assert.equal((await route.POST(request(' LUANVICTORLCST12@GMAIL.COM '))).status,400);assert.deepEqual(calls,[])});
+test('missing email configuration creates no account',async()=>{const {route,calls}=fixture({ready:false});assert.equal((await route.POST(request('worker@example.com'))).status,503);assert.deepEqual(calls,[])});
+test('existing employee is not recreated or reset',async()=>{const {route,calls}=fixture({exists:true});assert.equal((await route.POST(request('worker@example.com'))).status,409);assert.deepEqual(calls,[])});
+test('email acceptance precedes access grant and API never exposes password',async()=>{const {route,calls}=fixture();const response=await route.POST(request('worker@example.com'));assert.equal(response.status,201);assert.deepEqual(calls,['create','send','grant']);assert.ok(!(await response.text()).includes('TEST-SECRET'))});
+test('failed email cleans up new auth account without granting access',async()=>{const {route,calls}=fixture({mailFails:true});assert.equal((await route.POST(request('worker@example.com'))).status,503);assert.deepEqual(calls,['create','send','rollback'])});
+test('failed database grant cleans up new auth account',async()=>{const {route,calls}=fixture({dbFails:true});assert.equal((await route.POST(request('worker@example.com'))).status,503);assert.deepEqual(calls,['create','send','grant','rollback'])});
+test('public signup is refused before calling Supabase',async()=>{const route=load('app/api/auth/route.ts',{'@supabase/ssr':{createServerClient:()=>{throw Error('must not be called')}},'next/server':{NextResponse:Response},'@/lib/booking':{},'@/lib/access':access});const response=await route.POST({json:async()=>({action:'signup',email:'worker@example.com',password:'test'})});assert.equal(response.status,403)});
+for(const [file,method] of [['services','POST'],['services','PATCH'],['settings','PUT'],['settings','POST'],['settings','DELETE']])test(`employee cannot mutate ${file} via ${method}`,async()=>{const route=load(`app/api/admin/${file}/route.ts`,{'@/lib/booking':{admin:async()=>true,owner:async()=>false,fail:(error,status=400)=>Response.json({error},{status})}});assert.equal((await route[method]({})).status,403)});
