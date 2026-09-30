@@ -20,3 +20,5 @@ Para enviar automaticamente a senha inicial, configure na Vercel: `SUPABASE_SECR
 O envio é confirmado pelo Gmail antes de liberar o acesso. Em falhas, a conta nova sem acesso é removida. Se um e-mail já tem conta no Supabase, o cadastro retorna conflito sem alterar sua senha.
 
 O Gmail remetente é a conta administradora. A senha de aplicativo exige verificação em duas etapas no Google; não use a senha comum da conta. Guarde as duas chaves somente nas variáveis secretas da Vercel.
+
+Link público de agendamento: https://agendamentoduujato.vercel.app/. O painel do proprietário continua em https://duujato.vercel.app/admin. Ambos os domínios estão conectados ao mesmo projeto na Vercel; compartilham serviços, horários e agendamentos.
