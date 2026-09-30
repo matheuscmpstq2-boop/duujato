@@ -15,6 +15,8 @@ As rotas de cliente continuam públicas; rotas administrativas verificam o usuá
 
 Apenas o administrador cadastra funcionários. Funcionários podem operar agenda e caixa, mas não alteram serviços, horários ou acessos. A rota pública de cadastro foi bloqueada. Remover um funcionário revoga seu acesso imediatamente nas rotas, inclusive com sessão existente.
 
-Para enviar automaticamente a senha inicial, configure na Vercel: `SUPABASE_SECRET_KEY` (chave secreta do projeto, somente servidor), `RESEND_API_KEY`, `EMAIL_FROM` (remetente em domínio verificado no Resend) e `NEXT_PUBLIC_SITE_URL=https://duujato.vercel.app`. Sem essas configurações, o cadastro permanece desativado e informa a pendência. As senhas são geradas aleatoriamente, enviadas somente por e-mail, nunca retornadas ao painel nem gravadas em texto no banco. O funcionário pode trocar a senha na primeira entrada pela aba Trocar senha.
+Para enviar automaticamente a senha inicial, configure na Vercel: `SUPABASE_SECRET_KEY` (chave secreta do projeto, somente servidor), `GMAIL_APP_PASSWORD` (senha de aplicativo de 16 caracteres da conta `luanvictorlcst12@gmail.com`) e, opcionalmente, `NEXT_PUBLIC_SITE_URL=https://duujato.vercel.app`. Sem essas configurações, o cadastro permanece desativado e informa a pendência. As senhas são geradas aleatoriamente, enviadas somente por e-mail, nunca retornadas ao painel nem gravadas em texto no banco. O funcionário pode trocar a senha na primeira entrada pela aba Trocar senha.
 
-O envio é confirmado pelo provedor antes de liberar o acesso. Em falhas, a conta nova sem acesso é removida. Se um e-mail já tem conta no Supabase, o cadastro retorna conflito sem alterar sua senha.
+O envio é confirmado pelo Gmail antes de liberar o acesso. Em falhas, a conta nova sem acesso é removida. Se um e-mail já tem conta no Supabase, o cadastro retorna conflito sem alterar sua senha.
+
+O Gmail remetente é a conta administradora. A senha de aplicativo exige verificação em duas etapas no Google; não use a senha comum da conta. Guarde as duas chaves somente nas variáveis secretas da Vercel.

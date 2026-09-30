@@ -1,6 +1,8 @@
 import {db,fail,owner} from '@/lib/booking';
 import {isOwnerEmail,normalizeEmail,validEmail} from '@/lib/access';
 import {employeeAuth,invitationsConfigured,sendEmployeeAccess,temporaryPassword} from '@/lib/employee-provisioning';
+export const runtime='nodejs';
+export const maxDuration=60;
 export async function GET(){if(!await owner())return fail('Apenas o administrador pode gerenciar funcionários.',403);try{return Response.json({accounts:(await db().prepare('SELECT email,created_at FROM admin_accounts ORDER BY email').all()).results,invitationsConfigured:invitationsConfigured()})}catch{return fail('Não foi possível carregar os funcionários.',503)}}
 export async function POST(request:Request){if(!await owner())return fail('Acesso restrito ao administrador.',403);let email:string;try{email=normalizeEmail(((await request.json()) as {email?:string}).email)}catch{return fail('Dados inválidos.')}if(!validEmail(email))return fail('Informe um e-mail válido.');if(isOwnerEmail(email))return fail('Esta é a conta administradora e não pode ser cadastrada como funcionário.');if(!invitationsConfigured())return fail('O envio de acessos por e-mail ainda precisa ser configurado. Nenhuma conta foi criada.',503);
 try{if(await db().prepare('SELECT email FROM admin_accounts WHERE email=?').bind(email).first())return fail('Este funcionário já está cadastrado.',409)}catch{return fail('Não foi possível consultar os funcionários.',503)}
