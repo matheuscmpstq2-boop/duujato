@@ -13,7 +13,7 @@ As rotas de cliente continuam públicas; rotas administrativas verificam o usuá
 
 ## Funcionários e e-mail
 
-Apenas o administrador cadastra funcionários. Funcionários podem operar agenda e caixa, mas não alteram serviços, horários ou acessos. A rota pública de cadastro foi bloqueada. Remover um funcionário revoga seu acesso imediatamente nas rotas, inclusive com sessão existente.
+Apenas o administrador cadastra funcionários. Funcionários podem operar a agenda, mas não acessam o caixa, os recebimentos ou a exportação financeira, nem alteram serviços, horários ou acessos. O financeiro é exclusivo do administrador. A rota pública de cadastro foi bloqueada. Remover um funcionário revoga seu acesso imediatamente nas rotas, inclusive com sessão existente.
 
 Para enviar automaticamente a senha inicial, configure na Vercel: `SUPABASE_SECRET_KEY` (chave secreta do projeto, somente servidor), `GMAIL_APP_PASSWORD` (senha de aplicativo de 16 caracteres da conta `luanvictorlcst12@gmail.com`) e, opcionalmente, `NEXT_PUBLIC_SITE_URL=https://duujato.vercel.app`. Sem essas configurações, o cadastro permanece desativado e informa a pendência. As senhas são geradas aleatoriamente, enviadas somente por e-mail, nunca retornadas ao painel nem gravadas em texto no banco. O funcionário pode trocar a senha na primeira entrada pela aba Trocar senha.
 

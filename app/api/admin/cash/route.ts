@@ -1,4 +1,4 @@
-import {admin,db,fail,localNow} from '@/lib/booking';
+import {owner,db,fail,localNow} from '@/lib/booking';
 
 type CashEntry={id:string;type:string;date:string;category:string;description:string;amount_cents:number;payment_method:string;created_at:string;booking_id:string|null;voided_at:string|null};
 const validDate=(date:string)=>/^\d{4}-\d{2}-\d{2}$/.test(date)&&!Number.isNaN(Date.parse(date+'T12:00:00Z'))&&new Date(date+'T12:00:00Z').toISOString().slice(0,10)===date;
@@ -8,7 +8,7 @@ function nextMonth(month:string){const [year,m]=month.split('-').map(Number);ret
 function csvCell(v:string|number){let text=String(v);if(/^[=+\-@\t\r]/.test(text))text="'"+text;return '"'+text.replace(/"/g,'""')+'"'}
 
 export async function GET(request:Request){
-  if(!await admin())return fail('Acesso restrito.',403);
+  if(!await owner())return fail('Acesso restrito.',403);
   const q=new URL(request.url).searchParams,month=q.get('month')||localNow().today.slice(0,7),format=q.get('format');
   if(!/^\d{4}-(0[1-9]|1[0-2])$/.test(month))return fail('Mês inválido.');
   try{
@@ -28,7 +28,7 @@ export async function GET(request:Request){
 }
 
 export async function POST(request:Request){
-  if(!await admin())return fail('Acesso restrito.',403);
+  if(!await owner())return fail('Acesso restrito.',403);
   let data:Record<string,unknown>;try{data=await request.json()}catch{return fail('Dados inválidos.')}
   const type=data.type,date=data.date,category=data.category,description=data.description,amount=data.amount_cents,method=data.payment_method,bookingId=data.booking_id;
   if((type!=='income'&&type!=='expense')||typeof date!=='string'||!validDate(date)||typeof category!=='string'||!categories[type].includes(category)||typeof description!=='string'||description.trim().length<2||description.trim().length>180||typeof amount!=='number'||!Number.isSafeInteger(amount)||amount<1||amount>100000000||typeof method!=='string'||!methods.includes(method)||bookingId!==undefined&&bookingId!==null&&(type!=='income'||typeof bookingId!=='string'||!/^[-a-f0-9]{36}$/.test(bookingId)))return fail('Confira os dados do lançamento.');
@@ -41,7 +41,7 @@ export async function POST(request:Request){
 }
 
 export async function DELETE(request:Request){
-  if(!await admin())return fail('Acesso restrito.',403);
+  if(!await owner())return fail('Acesso restrito.',403);
   const id=new URL(request.url).searchParams.get('id');if(!id||!/^[-a-f0-9]{36}$/.test(id))return fail('Lançamento inválido.');
   try{const result=await db().prepare('UPDATE cash_entries SET voided_at=? WHERE id=? AND voided_at IS NULL').bind(new Date().toISOString(),id).run();if(!result.meta.changes)return fail('Lançamento não encontrado.',404);return Response.json({ok:true})}catch{return fail('Não foi possível estornar o lançamento.',503)}
 }
