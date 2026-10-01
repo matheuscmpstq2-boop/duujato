@@ -22,3 +22,5 @@ O envio é confirmado pelo Gmail antes de liberar o acesso. Em falhas, a conta n
 O Gmail remetente é a conta administradora. A senha de aplicativo exige verificação em duas etapas no Google; não use a senha comum da conta. Guarde as duas chaves somente nas variáveis secretas da Vercel.
 
 Link público de agendamento: https://agendamentoduujato.vercel.app/. O painel do proprietário continua em https://duujato.vercel.app/admin. Ambos os domínios estão conectados ao mesmo projeto na Vercel; compartilham serviços, horários e agendamentos.
+
+Na agenda, apenas o administrador pode usar Novo atendimento para registrar um carro sem reserva ou uma reserva recebida diretamente. O WhatsApp é opcional. O horário respeita expediente, pausas e capacidade. Ao marcar Pagamento já recebido, o atendimento, a ocupação da vaga e a entrada vinculada no caixa são gravados na mesma transação; sem essa marcação, o recebimento é registrado depois. Repetir o mesmo envio após uma falha de conexão não duplica o atendimento nem o pagamento.
