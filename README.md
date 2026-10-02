@@ -24,3 +24,5 @@ O Gmail remetente é a conta administradora. A senha de aplicativo exige verific
 Link público de agendamento: https://agendamentoduujato.vercel.app/. O painel do proprietário continua em https://duujato.vercel.app/admin. Ambos os domínios estão conectados ao mesmo projeto na Vercel; compartilham serviços, horários e agendamentos.
 
 Na agenda, o administrador e os funcionários podem usar Novo atendimento para registrar um carro sem reserva ou uma reserva recebida diretamente. O WhatsApp é opcional. O horário respeita expediente, pausas e capacidade. O registro de pagamentos e o acesso ao caixa são exclusivos do administrador. Ao marcar Pagamento já recebido, o atendimento, a ocupação da vaga e a entrada vinculada no caixa são gravados na mesma transação; sem essa marcação, o recebimento é registrado depois. Repetir o mesmo envio após uma falha de conexão não duplica o atendimento nem o pagamento.
+
+Em Serviços, o administrador escolhe a duração de cada lavagem em minutos inteiros (1 a 1440). Os horários de início seguem intervalos de 30 minutos; a agenda ocupa todos os blocos necessários até o fim do serviço, inclusive quando a duração não é múltipla de 30.

@@ -8,7 +8,7 @@ export const defaultHours:Hours[]=DAYS.map((_,weekday)=>({weekday,enabled:1,open
 export {db};
 export function minutes(s:string){const [h,m]=s.split(':').map(Number);return h*60+m}
 export function clock(n:number){return `${String(Math.floor(n/60)).padStart(2,'0')}:${String(n%60).padStart(2,'0')}`}
-export function slotsFor(time:string,duration:number){const start=minutes(time);return Array.from({length:duration/30},(_,i)=>clock(start+i*30))}
+export function slotsFor(time:string,duration:number){const start=minutes(time);return Array.from({length:Math.ceil(duration/30)},(_,i)=>clock(start+i*30))}
 export function validClock(s:string){return /^([01]\d|2[0-3]):(00|30)$/.test(s)}
 export function localNow(){const current=new Date();return {today:new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).format(current),time:new Intl.DateTimeFormat('en-GB',{timeZone:'America/Sao_Paulo',hour:'2-digit',minute:'2-digit',hourCycle:'h23'}).format(current)}}
 export function validDate(s:string){if(!/^\d{4}-\d{2}-\d{2}$/.test(s))return false;const d=new Date(`${s}T12:00:00Z`);if(Number.isNaN(d.valueOf())||d.toISOString().slice(0,10)!==s)return false;const now=localNow().today;const days=(Date.parse(s+'T12:00:00Z')-Date.parse(now+'T12:00:00Z'))/86400000;return days>=0&&days<=90}

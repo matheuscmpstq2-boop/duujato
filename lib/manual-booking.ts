@@ -22,7 +22,7 @@ export async function createManualBooking(request:Request){
     if(existing)return Response.json({id:existing.id,status:existing.status,paid:isOwner&&existing.cash_id!=null,alreadyRegistered:true});
     const service=await db().prepare('SELECT id,name,duration FROM services WHERE id=? AND active=1').bind(serviceId).first<{id:string;name:string;duration:number}>();
     if(!service)return fail('Escolha um serviço ativo.');
-    if(!Number.isInteger(service.duration)||service.duration<30||service.duration%30!==0)return fail('Revise a duração do serviço.');
+    if(!Number.isInteger(service.duration)||service.duration<1||service.duration>1440)return fail('Revise a duração do serviço.');
     const [hours,closed]=await Promise.all([hoursOn(date),db().prepare('SELECT date FROM closed_dates WHERE date=?').bind(date).first()]);
     const start=minutes(time),end=start+service.duration;
     if(closed||!hours.enabled||start<minutes(hours.opening)||end>minutes(hours.closing)||(hours.break_start&&hours.break_end&&start<minutes(hours.break_end)&&end>minutes(hours.break_start)))return fail('O atendimento deve caber no expediente, fora das pausas e dos dias fechados.',409);
