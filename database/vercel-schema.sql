@@ -30,6 +30,16 @@ CREATE TABLE IF NOT EXISTS cash_entries (
 );
 CREATE INDEX IF NOT EXISTS idx_cash_entries_date ON cash_entries(date);
 CREATE UNIQUE INDEX IF NOT EXISTS idx_cash_booking_active ON cash_entries(booking_id) WHERE booking_id IS NOT NULL AND voided_at IS NULL;
+CREATE TABLE IF NOT EXISTS whatsapp_notifications (
+  booking_id text PRIMARY KEY REFERENCES bookings(id),
+  recipient text NOT NULL,
+  status text NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','sending','accepted','failed','uncertain','cancelled')),
+  attempts integer NOT NULL DEFAULT 0,
+  message_id text,
+  error text,
+  created_at text NOT NULL,
+  updated_at text NOT NULL
+);
 -- O browser não acessa tabelas pelo Data API; acesso passa pelas rotas com controle no servidor.
 ALTER TABLE services ENABLE ROW LEVEL SECURITY;
 ALTER TABLE bookings ENABLE ROW LEVEL SECURITY;
@@ -40,3 +50,10 @@ ALTER TABLE closed_dates ENABLE ROW LEVEL SECURITY;
 ALTER TABLE admin_accounts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE cash_entries ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON services,bookings,occupied_slots,business_settings,weekly_hours,closed_dates,admin_accounts,cash_entries FROM anon,authenticated;
+
+ALTER TABLE whatsapp_notifications ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON whatsapp_notifications FROM anon,authenticated;
+GRANT SELECT,INSERT,UPDATE ON whatsapp_notifications TO duujato_app;
+CREATE INDEX IF NOT EXISTS idx_whatsapp_created ON whatsapp_notifications(created_at);
+DROP POLICY IF EXISTS whatsapp_server_access ON whatsapp_notifications;
+CREATE POLICY whatsapp_server_access ON whatsapp_notifications TO duujato_app USING (true) WITH CHECK (true);
